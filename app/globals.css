@@ -98,6 +98,11 @@ h2 { font-size: clamp(2.2rem, 7vw, 5.4rem); }
   color: #fff7df;
 }
 .score-card p { color: rgba(255, 247, 223, 0.78); }
+.source-line {
+  margin: -2px 0 10px;
+  font-size: 0.9rem !important;
+  color: rgba(255, 247, 223, 0.58) !important;
+}
 .score-topline { display: flex; justify-content: space-between; gap: 16px; font-weight: 900; }
 .score-topline strong { color: var(--sun); }
 .score-number {

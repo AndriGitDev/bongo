@@ -8,7 +8,8 @@ Credential-free static-first MVP for answering the important Icelandic question:
 - Deterministic 0–100 Bongó score with Icelandic labels and explanations.
 - Top-5 list for **Hvar er bongó?**.
 - About/origin story: Andri's 14-year-old 3W solar-powered LED sign in the window.
-- No accounts, no user reports, no uploads, no credentials, no external weather calls.
+- No accounts, no user reports, no uploads, no credentials, and no client-side weather calls.
+- Live weather uses the credential-free MET Norway Locationforecast API server-side with 15-minute cache and static/mock fallback.
 
 ## Local development
 

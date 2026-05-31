@@ -1,7 +1,10 @@
 import { locations, mockWeatherByLocationId } from '../lib/mock-data';
+import { getWeatherSnapshots } from '../lib/metno.mjs';
 import { nearestBetterLocations, rankLocations, scoreBongo } from '../lib/scoring.mjs';
 
 type SearchParams = Promise<{ stad?: string }>;
+
+export const revalidate = 900;
 
 function pct(score: number) {
   return `${score}%`;
@@ -11,20 +14,27 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
   const params = await searchParams;
   const selectedId = params.stad && locations.some((location) => location.id === params.stad) ? params.stad : 'reykjavik';
   const selectedLocation = locations.find((location) => location.id === selectedId)!;
-  const scoredAll = locations.map((location) => scoreBongo(location, mockWeatherByLocationId[location.id]));
-  const selectedScore = scoreBongo(selectedLocation, mockWeatherByLocationId[selectedLocation.id]);
-  const topFive = rankLocations(locations, mockWeatherByLocationId, 5);
+  const weather = await getWeatherSnapshots(locations, mockWeatherByLocationId);
+  const scoredAll = locations.map((location) => scoreBongo(location, weather.snapshots[location.id]));
+  const selectedScore = scoreBongo(selectedLocation, weather.snapshots[selectedLocation.id]);
+  const topFive = rankLocations(locations, weather.snapshots, 5);
   const betterNearby = nearestBetterLocations(selectedLocation, scoredAll, selectedScore.score, 3);
+  const dataLabel = weather.mode === 'live'
+    ? 'lifandi spágögn frá MET Norway'
+    : weather.mode === 'partial-live'
+      ? `lifandi spágögn með mock-varaleið fyrir ${weather.failedLocationIds.length} staði`
+      : 'mock-veðurgögn sem varaleið';
+  const updatedAt = selectedScore.providerUpdatedAt || selectedScore.observedAt;
 
   return (
     <main>
       <section className="hero">
-        <p className="eyebrow">bongo.andri.is · demo með föstum gögnum</p>
+        <p className="eyebrow">bongo.andri.is · lifandi veðurgögn með öruggri varaleið</p>
         <h1>Bongómælir</h1>
         <p className="lead">Hversu bongó er hjá þér?</p>
         <p className="intro">
-          Bongó er ekki bara sól. Það er sól + logn + hiti + þurrt teppi. Þessi fyrsta útgáfa notar
-          mock-veðurgögn og deterministic skor svo mælikvarðinn sé prófanlegur áður en lifandi veðurgögn koma inn.
+          Bongó er ekki bara sól. Það er sól + logn + hiti + þurrt teppi. Nú notar Bongómælirinn
+          {` ${dataLabel}`} og heldur mock-gögnum sem öruggri varaleið ef veðurþjónustan svarar ekki.
         </p>
         <div className="hero-actions">
           <a href="#maela" className="button primary">Mæla bongó</a>
@@ -52,6 +62,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
             <strong>{selectedScore.label}</strong>
           </div>
           <div className="score-number">{pct(selectedScore.score)}</div>
+          <p className="source-line">Gögn: {selectedScore.source || 'mock'} · uppfært {formatDateTime(updatedAt)}</p>
           <p>{selectedScore.explanation}</p>
           <dl className="factors">
             {Object.entries(selectedScore.factors).map(([key, factor]: [string, any]) => (
@@ -88,7 +99,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
         <div>
           <p className="eyebrow">Topplisti</p>
           <h2>Hvar er bongó?</h2>
-          <p className="muted">Topp 5 staðirnir í mock-gögnum dagsins. Í lifandi útgáfu verður þessi listi knúinn af veðuradapter með cache og heimildum.</p>
+          <p className="muted">Topp 5 staðirnir miðað við {dataLabel}. Síðan cache-ar veðurköll í 15 mínútur og notar mock-varaleið ef þjónusta dettur út.</p>
         </div>
         <ol className="rank-list">
           {topFive.map((entry, index) => (
@@ -125,11 +136,20 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
         <h2>v1 er viljandi lítið</h2>
         <ul>
           <li>Engir notendareikningar, engar innsentar skýrslur og engar myndir.</li>
-          <li>Engin API-lyklar eða credentials í fyrstu sneiðinni.</li>
+          <li>Engin API-lyklar eða credentials: veðurgögn eru sótt server-side frá opinni MET Norway Locationforecast þjónustu.</li>
           <li>Skorun er deterministic og þakin prófum: sól 35%, vindur 30%, hiti 20%, þurrt teppi 10%, dagsbirta 5%.</li>
-          <li>Gögnin hér eru static/mock. Lifandi veðurgögn koma síðar í gegnum aðskilinn adapter.</li>
+          <li>Mock-gögn eru áfram til sem varaleið svo síðan brotni ekki þó lifandi veðurköll mistakist.</li>
         </ul>
       </section>
     </main>
   );
+}
+
+function formatDateTime(value?: string) {
+  if (!value) return 'óþekkt';
+  return new Intl.DateTimeFormat('is-IS', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+    timeZone: 'Atlantic/Reykjavik',
+  }).format(new Date(value));
 }

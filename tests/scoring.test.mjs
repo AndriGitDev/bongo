@@ -47,6 +47,13 @@ test('rain and heavy clouds keep the score low', () => {
   assert.match(result.explanation, /rign|blautt|ský/i);
 });
 
+test('scoreBongo carries data source metadata through to the UI layer', () => {
+  const result = scoreBongo(location, snapshot({ source: 'MET Norway Locationforecast', providerUpdatedAt: '2026-05-31T06:00:00Z' }));
+
+  assert.equal(result.source, 'MET Norway Locationforecast');
+  assert.equal(result.providerUpdatedAt, '2026-05-31T06:00:00Z');
+});
+
 test('label thresholds are deterministic', () => {
   assert.equal(getBongoLabel(94), 'Bongó');
   assert.equal(getBongoLabel(82), 'Bongólegt');
