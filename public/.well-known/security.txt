@@ -1,0 +1,4 @@
+Contact: https://github.com/AndriGitDev/bongo/security/advisories/new
+Expires: 2027-07-19T00:00:00Z
+Preferred-Languages: en, is
+Canonical: https://bongo.andri.is/.well-known/security.txt
