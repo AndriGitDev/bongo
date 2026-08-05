@@ -63,6 +63,27 @@ test('label thresholds are deterministic', () => {
   assert.equal(getBongoLabel(8), 'Farðu inn');
 });
 
+test('daylight factor uses sun elevation tiers when available', () => {
+  const bright = scoreBongo(location, snapshot({ sunElevationDeg: 30 }));
+  const lowSun = scoreBongo(location, snapshot({ sunElevationDeg: 2 }));
+  const twilight = scoreBongo(location, snapshot({ sunElevationDeg: -3 }));
+  const dark = scoreBongo(location, snapshot({ sunElevationDeg: -12 }));
+
+  assert.equal(bright.factors.daylight.score, 100);
+  assert.equal(bright.factors.daylight.value, 'bjart');
+  assert.equal(lowSun.factors.daylight.score, 70);
+  assert.equal(lowSun.factors.daylight.value, 'lág sól');
+  assert.equal(twilight.factors.daylight.score, 40);
+  assert.equal(twilight.factors.daylight.value, 'húm');
+  assert.equal(dark.factors.daylight.score, 12);
+  assert.equal(dark.factors.daylight.value, 'dimmt');
+});
+
+test('daylight factor falls back to the boolean for mock snapshots', () => {
+  assert.equal(scoreBongo(location, snapshot()).factors.daylight.score, 100);
+  assert.equal(scoreBongo(location, snapshot({ daylight: false })).factors.daylight.score, 12);
+});
+
 test('rankLocations returns top five in deterministic score then name order', () => {
   const locations = [
     { id: 'a', name: 'Akranes', lat: 64.32, lon: -22.07 },
