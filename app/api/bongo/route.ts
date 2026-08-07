@@ -7,6 +7,9 @@ import { nearestKnownLocation } from '../../../lib/geo.mjs';
 import { locations, mockWeatherByLocationId } from '../../../lib/mock-data';
 
 export const dynamic = 'force-dynamic';
+// Vercel Hobby's default function timeout (10 s) exactly matches the MET Norway
+// fetch timeout — give slow responses and cold starts breathing room.
+export const maxDuration = 30;
 
 const CACHE_TTL_MS = 15 * 60 * 1000;
 const cache = new Map<string, { payload: unknown; expiresAt: number }>();

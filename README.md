@@ -64,6 +64,21 @@ npm run build
 npm run dev
 ```
 
+## Vistun á Vercel
+
+Verkefnið keyrir óbreytt á Vercel:
+
+1. Flyttu repo-ið inn á [vercel.com](https://vercel.com) — Next.js greinist sjálfkrafa og
+   `next build` er sjálfgefin byggingarskipun.
+2. Node-útgáfan er fest með `engines` í `package.json` og samsvarar því sem CI keyrir.
+3. Fyrir `bongo.andri.is`: bættu léninu við verkefnið í Vercel og settu CNAME-færslu á
+   `cname.vercel-dns.com`. HTTPS fylgir sjálfkrafa, sem staðsetningar-API vafrans krefst.
+
+Lítill fyrirvari fyrir serverless: minnislæga 15 mínútna skyndimennið í `/api/bongo` gildir
+aðeins innan hvers keyrslutilviks. `s-maxage=900` í `Cache-Control` sér hins vegar um að
+svörin eru geymd í skyndiminni á brún Vercels fyrir alla umferð, þannig að álagið á MET
+Norway helst lítið þótt tilvik skalist út.
+
 ## Af hverju?
 
 Þegar Andri var um 14 ára bjó hann til heimagerðan Bongómæli: LED-skilti í glugganum með orðinu
