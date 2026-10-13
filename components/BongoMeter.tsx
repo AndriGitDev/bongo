@@ -4,10 +4,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import type { BongoLocation, BongoFactor, BongoWindow, TimelineEntry } from '../lib/scoring.mjs';
 import { isValidCoordinate } from '../lib/geo.mjs';
+import { formatDateTime, formatHour, zonedDay } from '../lib/time.mjs';
 import type { BongoMood, BongoPayload } from '../lib/assemble.mjs';
 
 const STORAGE_KEY = 'bongo.hnit.v2';
-const TIME_ZONE = 'Atlantic/Reykjavik';
 
 type Status = 'server' | 'locating' | 'you' | 'denied' | 'geo-error' | 'fetch-error';
 
@@ -48,33 +48,6 @@ function clearSaved() {
   } catch {
     // Ignore.
   }
-}
-
-function formatDateTime(value?: string | null) {
-  if (!value) return 'óþekkt';
-  return new Intl.DateTimeFormat('is-IS', {
-    dateStyle: 'short',
-    timeStyle: 'short',
-    timeZone: TIME_ZONE,
-  }).format(new Date(value));
-}
-
-function formatHour(iso: string) {
-  return new Intl.DateTimeFormat('is-IS', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hourCycle: 'h23',
-    timeZone: TIME_ZONE,
-  }).format(new Date(iso));
-}
-
-function zonedDay(iso: string) {
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone: TIME_ZONE,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(new Date(iso));
 }
 
 function weekdayShort(iso: string) {

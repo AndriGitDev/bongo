@@ -1,4 +1,5 @@
 import BongoMeter from '../components/BongoMeter';
+import { formatDateTime } from '../lib/time.mjs';
 import { assembleBongoPayload } from '../lib/assemble.mjs';
 import { locations, mockWeatherByLocationId } from '../lib/mock-data';
 import { getWeatherSnapshots } from '../lib/metno.mjs';
@@ -159,11 +160,3 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
   );
 }
 
-function formatDateTime(value?: string | null) {
-  if (!value) return 'óþekkt';
-  return new Intl.DateTimeFormat('is-IS', {
-    dateStyle: 'short',
-    timeStyle: 'short',
-    timeZone: 'Atlantic/Reykjavik',
-  }).format(new Date(value));
-}
